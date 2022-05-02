@@ -1,0 +1,5 @@
+# Size Settings
+# For True/False statements, True = 1, False = 0
+Fullscreen=1
+Width=1600
+Height=900
