@@ -1,5 +1,6 @@
 # Size Settings
 # For True/False statements, True = 1, False = 0
 Fullscreen=1
-Width=1600
-Height=900
+# Not recommended for use under 1280x720
+Width=1280
+Height=720

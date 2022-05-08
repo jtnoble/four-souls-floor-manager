@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import PhotoImage, ttk
 from PIL import ImageTk, Image
 
+# AUTHOR: jtnoble
 
 class App(tk.Frame):
+    # Initialize application
     def __init__(self, parent):
         tk.Frame = tk.Frame
         self.parent = parent
@@ -16,88 +17,98 @@ class App(tk.Frame):
         self.background_image_setup("isaac_bg.png")
         self.title_screen()
     
-
+    # "Title" as in main screen
     def title_screen(self):
-        _width = int(self.screen_width / 100)
-        _height = int(self.screen_height / 200)
+        # Width/Height are arbitrary, made to just fit to what looks good.
+        _width = int(self.screen_width / 75)
+        _height = int(self.screen_height / 150)
+
+        # Ran on initialize to create a buttons list. Must be cleared every time "title_screen" is loaded to prevent extra buttons
         if self.first_Time:
             self.buttons = []
         self.buttons.clear()
-        floors = ["Basement", "Catacombs", "Mines", "Sheol/Cathedral", "Depths", "The Chest", "The Womb", "Downpour"]
+        
+        # Hard Coded floors. Easily changable, didn't feel like putting these in a file
+        floors = [
+            "Basement/Cellar/Burning Basement", 
+            "Caves/Flooded Caves/Catacombs", 
+            "Downpour/Dross", 
+            "Mines/Ashpit", 
+            "Depths/Dank Depths/Necropolis",
+            "Mausoleum/Gehenna",
+            "Womb/Scarred Womb/Utero",
+            "Cathedral/Sheol",
+            "The Chest/Dark Room",
+            "Void/Home",
+            "???/Corpse"
+            ]
 
+        # Create a frame to hold all of the floors (first time only to prevent extra buttons)
         if self.first_Time:
             self.buttons_frame = tk.Frame(self.parent, bg='black', width=(self.screen_width/3), height=(self.screen_height/3))
             for floor in floors:
-                self.buttons.append(tk.Button(self.buttons_frame, text=floor, font=("Arial", 20), bg="darkgrey", width=_width, height=_height, command=lambda floor=floor:self.floor_rules(floor)))
-            self.buttons.append(tk.Button(self.buttons_frame, text="Quit", font=("Arial", 20), bg="darkgrey", width=_width, height=_height, command=self.parent.destroy))
+                self.buttons.append(tk.Button(self.buttons_frame, text=floor, wraplength=_width*15, font=("",18), bg="darkgrey", width=_width, height=_height, command=lambda floor=floor:self.nested_floors(floor)))
+            self.buttons.append(tk.Button(self.buttons_frame, text="Quit", bg="darkgrey", wraplength=_width*15, font=("",18), width=_width, height=_height, command=self.parent.destroy))
             self.first_Time = False
+        # Placing frame, will be forgotten later
         self.buttons_frame.place(anchor="c", relx=.5, rely=.5)
+        # Placing buttons on grid, will be forgotten later
         for i in range(0, len(self.buttons)):
-            self.buttons[i].grid(row=int(i/3), column=int(i%3), padx=3, pady=3)
-            self.buttons[i].configure()
+            self.buttons[i].grid(row=int(i/4), column=int(i%4), padx=3, pady=3)
 
-    def floor_rules(self, _index):
+    # Forget placement of buttons_frame, Check if floors have a "/"
+    def nested_floors(self, _index):
         self.buttons_frame.place_forget()
-        print(_index)
+        #print(_index)
 
-        back_button = tk.Button(text="Back", bg='#696969', width=10, height=3, command=lambda: [self.title_screen(), self.change_background_image("isaac_bg"), back_button.destroy()])
-        back_button.place(relx=0.95, rely=0.95, anchor="se")
+        self.back_button = tk.Button(text="Back", bg='#696969', width=10, height=3, command=lambda: [self.title_screen(), self.change_background_image("isaac_bg"), self.back_button.destroy()])
+        self.back_button.place(relx=0.95, rely=0.95, anchor="se")
 
-        if _index == "Basement":
-            self.basement_choices()
-        elif _index == "Sheol/Cathedral":
-            self.cathedral_choices()
+        if "/" in _index:
+            self.separate_n_generate(_index)
         else:
             self.change_background_image(_index)
-        
 
-    def cathedral_choices(self):
+    # Splits floors with "/" into separate elements to make buttons for individual floors
+    def separate_n_generate(self, _index):
         _width = int(self.screen_width / 100)
         _height = int(self.screen_height / 200)
-        buttons_cathedral = []
+        nested_buttons = []
         buttons_frame = tk.Frame(self.parent, bg='black', width=(self.screen_width/3), height=(self.screen_height/3))
-        sheol_cathedral = ["Sheol", "Cathedral"]
+        subfloors = _index.split("/")
         
-        back_button = tk.Button(text="Back", bg='#696969', width=10, height=3, command=lambda: [self.title_screen(), buttons_frame.place_forget(), self.change_background_image("isaac_bg"), buttons_cathedral.clear(), back_button.destroy()])
-        back_button.place(relx=0.95, rely=0.95, anchor="se")
+        self.back_button.configure(command=lambda: [self.title_screen(), buttons_frame.place_forget(), self.change_background_image("isaac_bg"), nested_buttons.clear(), self.back_button.destroy()])
         
-        for subfloor in sheol_cathedral:
-            buttons_cathedral.append(tk.Button(buttons_frame, text=subfloor, wraplength=200, font=("Arial", 20), bg="darkgrey", width=_width, height=_height, command=lambda subfloor=subfloor:[self.change_background_image(subfloor), buttons_frame.place_forget(), buttons_cathedral.clear(), back_button.destroy()]))
+        # New buttons/frame generator
+        for subfloor in subfloors:
+            nested_buttons.append(tk.Button(buttons_frame, text=subfloor, wraplength=200, font=("Arial", 20), bg="darkgrey", width=_width, height=_height, command=lambda subfloor=subfloor:[self.change_background_image(subfloor), buttons_frame.place_forget(), nested_buttons.clear()]))
         buttons_frame.place(anchor="c", relx=.5, rely=.5)
-        for i in range(0, len(buttons_cathedral)):
-            buttons_cathedral[i].grid(row=int(i/3), column=int(i%3), padx=3, pady=3)
+        for i in range(0, len(nested_buttons)):
+            nested_buttons[i].grid(row=int(i/3), column=int(i%3), padx=3, pady=3)
 
-    def basement_choices(self):
-        _width = int(self.screen_width / 100)
-        _height = int(self.screen_height / 200)
-        buttons_basement = []
-        buttons_frame = tk.Frame(self.parent, bg='black', width=(self.screen_width/3), height=(self.screen_height/3))
-        basement_subfloors = ["Basement", "Flooded Basement", "Burning Basement"]
-        
-        back_button = tk.Button(text="Back", bg='#696969', width=10, height=3, command=lambda: [self.title_screen(), buttons_frame.place_forget(), buttons_basement.clear(), self.change_background_image("isaac_bg"), back_button.destroy()])
-        back_button.place(relx=0.95, rely=0.95, anchor="se")
-        
-        for subfloor in basement_subfloors:
-            buttons_basement.append(tk.Button(buttons_frame, text=subfloor, wraplength=200, font=("Arial", 20), bg="darkgrey", width=_width, height=_height, command=lambda subfloor=subfloor:[self.change_background_image(subfloor), buttons_frame.place_forget(), buttons_basement.clear(), back_button.destroy()]))
-        buttons_frame.place(anchor="c", relx=.5, rely=.5)
-        for i in range(0, len(buttons_basement)):
-            buttons_basement[i].grid(row=int(i/3), column=int(i%3), padx=3, pady=3)
-
-
+    # Change background image to match background. Backgrounds have the text on them to make scaling to resolution easier.
     def change_background_image(self, img):
-        print("CHANGING")
         img = img.lower().replace(" ","_")
-        print(img)
+        # Check for ??? as filenames cannot contain question marks
+        if img == "???":
+            img = "hush"
+        # If for some reason a background doesn't match, this protects from erroring out.
+        try:
+            image = Image.open("config/images/"+img+".png")
+        except:
+            image = Image.open("config/images/isaac_bg.png")
 
-        image = Image.open("config/images/"+img+".png")
+        # Resizing image to fit resolution and placing image on screen
         resize_image = image.resize((self.screen_width, self.screen_height))
 
         self.bg_img = ImageTk.PhotoImage(resize_image)
 
         self.label1.configure(image=self.bg_img)
 
+        # Close image to preserve resources
         image.close()
 
+    # Run initially to open up background image
     def background_image_setup(self, img_link):
         image = Image.open("config/images/"+img_link)
 
@@ -110,8 +121,9 @@ class App(tk.Frame):
         self.label1.pack()
         image.close()
  
-
+    # Read settings.txt file for specific settings
     def settings(self):
+        # Failsafe to set width and height initially to desktop width and height
         self.settings_width = self.parent.winfo_screenwidth()
         self.settings_height = self.parent.winfo_screenheight()
         fullscreen = False
@@ -120,12 +132,12 @@ class App(tk.Frame):
         with open("config/settings.txt", "r") as f:
             lines = f.readlines()
         for line in lines:
-            if line.startswith("#"):
+            if line.startswith("#"):    # Skip lines with "#"
                 line = ""
-            if "Fullscreen" in line:
+            if "Fullscreen" in line:    # Check if application should be fullscreen
                 if "1" in line:
                     fullscreen = True
-            if not fullscreen:
+            if not fullscreen:          # Set width/height to values in settings.txt
                 if "Width" in line:
                     self.settings_width = line.strip("Width=")
                     self.settings_width = self.settings_width.strip("\n")
