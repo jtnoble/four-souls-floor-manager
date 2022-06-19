@@ -1,3 +1,5 @@
+# This is old, please go to https://github.com/jtnoble/four-souls-floor-manager-v2 for the newest version
+
 # four-souls-floor-manager
 A simple manager for a floor-based ruleset for the card game, "The Binding of Isaac: Four Souls"
 
